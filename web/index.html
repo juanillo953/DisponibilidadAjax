@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script>
+        function inicializar(){
+            if(window.XMLHttpRequest){
+                return new XMLHttpRequest();
+            }
+            else if(window.ActiveXObject){
+                return new ActiveXObject("Microsoft.XMLHTTP");
+            }
+
+        }
+        function comprobar(){
+            peticion_http = inicializar();
+            if(peticion_http){
+                peticion_http.onreadystatechange = procesaRespuesta;
+                peticion_http.open("POST","compruebaDisponibilidadJSON.jsp",true);
+                peticion_http.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+                var nombre = document.getElementById("user");
+                var textoNombre = "nombre="+nombre.value;
+                peticion_http.send(textoNombre);
+                
+            }
+        }
+        function procesaRespuesta(){
+            if(peticion_http.readyState == 4){
+                if(peticion_http.status ==200){
+                    var documentoJSON = peticion_http.responseText;
+                    var object_json = eval("("+documentoJSON+")");
+                    var disponible = object_json.disponible;
+                    console.log(object_json.disponible);
+                    if(disponible== "si"){
+                        var txt = "El nombre ["+document.getElementById("user").value+"] esta libre";
+                    }
+                    else{
+                        var txt = "No esta disponible el nombre elegido ["+document.getElementById("user").value+"]. Puedes probar con las siguientes alternativas:<br><ul><li><a href='#' onclick='cambiarNombre(this)'>"+object_json.alternativas[0]+"</a></li><li><a href='#' onclick='cambiarNombre(this)'>"+object_json.alternativas[1]+"</a></li></li><li><a href='#' onclick='cambiarNombre(this)'>"+object_json.alternativas[2]+"a</a></li></li><li><a href='#' onclick='cambiarNombre(this)'>"+object_json.alternativas[3]+"</a></li></ul>";
+                    }
+                   
+                    document.getElementById("comprobado").innerHTML=txt;
+                }
+
+            }
+        }
+        function cambiarNombre(objeto){
+            var nombreCambiado = objeto.innerHTML;
+            document.getElementById("user").value=nombreCambiado;
+        }
+        </script>
+    </head>
+    <body>
+        
+       <h1>Comprobar disponibilidad del login y monstrar alternativa</h1>
+       <form>
+       Nombre de usuario:
+       <input type="text" name="user" id="user"> 
+       <input type="button" value="Comprobar disponibilidad" onclick="comprobar()">
+        </form>
+       <div id="comprobado"></div>
+    </body>
+</html>
